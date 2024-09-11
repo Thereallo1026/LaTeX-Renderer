@@ -44,6 +44,20 @@
 3. The rendered equation will appear in a modal window.
 4. Click "Download" to save the SVG file, or "Close" to return to the input screen.
 
+## API Reference
+
+### Convert LaTeX to SVG
+
+Converts a LaTeX equation to an SVG image.
+
+### POST /api/create
+
+```json
+{
+  "latex": "base64-string"
+}
+```
+
 ## Acknowledgments
 
 - [tex-to-svg](https://www.npmjs.com/package/tex-to-svg) for LaTeX to SVG conversion.
