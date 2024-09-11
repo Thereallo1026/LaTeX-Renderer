@@ -4,7 +4,11 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head />
-      <body className="antialiased">
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/lonelil/fonts@latest/public/fonts/GoogleSans/use.min.css"
+      />
+      <body>
         <Main />
         <NextScript />
       </body>
