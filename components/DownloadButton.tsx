@@ -28,12 +28,12 @@ export default function DownloadButton({ svg }: { svg: string }) {
       const img = new Image();
       img.onload = () => {
         const scale = 5;
-        const margin = 10 * scale;
+        const margin = 15 * scale;
 
         const canvas = document.createElement("canvas");
 
-        canvas.width = (img.width + 40) * scale;
-        canvas.height = (img.height + 40) * scale;
+        canvas.width = img.width * scale + margin * 2;
+        canvas.height = img.height * scale + margin * 2;
 
         const ctx = canvas.getContext("2d");
         if (ctx) {
@@ -42,7 +42,7 @@ export default function DownloadButton({ svg }: { svg: string }) {
             ctx.fillStyle = "#1a1a1a";
             ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
           }
-          ctx.drawImage(img, 20, 20); // Draw image with 20px margin
+          ctx.drawImage(img, margin / scale, margin / scale); // Use margin when drawing image
           canvas.toBlob((blob) => {
             if (blob) {
               downloadFile(
