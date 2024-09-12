@@ -1,17 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
+
 import { Icon } from "@iconify/react";
+
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import NameBadge from "@/components/NameBadge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import { ConvertSVG } from "@/lib/LaTeX";
+import DownloadButton from "@/components/DownloadButton";
 
 export default function Home() {
   const [latexInput, setLatexInput] = useState("");
@@ -26,18 +33,6 @@ export default function Home() {
     setIsDialogOpen(true);
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([renderedSVG], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "latex-render.svg";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   useEffect(() => {
     if (isDialogOpen && contentRef.current) {
       const contentWidth = contentRef.current.scrollWidth;
@@ -45,7 +40,7 @@ export default function Home() {
       const maxWidth = Math.min(contentWidth + 40, viewportWidth - 40);
       setModalWidth(`min-w-[350px] w-[${maxWidth}px] max-w-[calc(100vw-40px)]`);
     }
-  }, [isDialogOpen, renderedSVG]);
+  }, [isDialogOpen]);
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -56,7 +51,7 @@ export default function Home() {
             LaTeX renderer
           </h1>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-center space-x-2">
           <h2 className="text-white text-opacity-80">
             Simple LaTeX renderer by
           </h2>
@@ -87,7 +82,7 @@ export default function Home() {
 
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent
-          className={`bg-[#0a0a0a] bg-opacity-60 backdrop-blur-lg border border-white border-opacity-20 ${modalWidth}`}
+          className={`bg-[#0a0a0a] bg-opacity-60 backdrop-blur-sm border border-white border-opacity-20 ${modalWidth}`}
         >
           <div>
             <div className="flex items-center space-x-2 text-2xl">
@@ -96,28 +91,46 @@ export default function Home() {
                 Render
               </AlertDialogTitle>
             </div>
-            <a className="text-white text-opacity-60">
+            <button
+              onClick={() => setIsDialogOpen(false)}
+              className="text-white hover:text-gray-300 focus:outline-none absolute top-4 right-4"
+              type="button"
+            >
+              <Icon icon="ic:baseline-close" className="text-xl" />
+            </button>
+            <p className="text-white text-opacity-60">
               LaTeX expression has been rendered.
-            </a>
+            </p>
           </div>
           <div
             ref={contentRef}
             className="my-2 p-2 bg-[#151515] rounded overflow-auto"
           >
-            <div dangerouslySetInnerHTML={{ __html: renderedSVG }} />
+            {/* <div dangerouslySetInnerHTML={{ __html: renderedSVG }} /> */}
+            <img
+              src={`data:image/svg+xml;base64,${btoa(
+                unescape(encodeURIComponent(renderedSVG))
+              )}`}
+              alt=""
+            />
           </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-[#0a0a0a] text-white hover:bg-[#1a1a1a] hover:text-white">
-              Close
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDownload}
-              className="bg-white text-black hover:bg-gray-100"
-            >
-              <Icon icon="mdi:download" className="mr-2" />
-              Download
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          <div className="flex items-center justify-between">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="bg-gradient-to-tr from-blue-600 to-purple-600 text-white">
+                    <Icon icon="ri:gemini-fill" className="text-lg" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Explain with AI</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div>
+              <DownloadButton svg={renderedSVG} />
+            </div>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
