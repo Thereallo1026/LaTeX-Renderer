@@ -13,7 +13,6 @@ import {
 import { Button } from "./ui/button";
 
 import { Icon } from "@iconify/react/dist/iconify.js";
-import { motion } from "framer-motion";
 
 // import { ConvertSVG } from "@/lib/LaTeX";
 // import { useState } from "react";
@@ -54,14 +53,6 @@ export default function ResultPopup({
       return;
     }
     explain(expression);
-  };
-  const breathingAnimation = {
-    opacity: [0.4, 0.8, 0.4],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "circInOut",
-    },
   };
 
   useEffect(() => {
