@@ -22,7 +22,7 @@ export async function generatePrompt(expression: string): Promise<string> {
           content: `${expression}`,
         },
       ],
-      model: "nousresearch/hermes-3-llama-3.1-405b:free",
+      model: "google/gemini-2.0-flash-thinking-exp:free",
       temperature: 0.5,
       max_tokens: 300,
     });
