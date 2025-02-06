@@ -1,50 +1,50 @@
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: process.env.BASE_URL,
-  apiKey: process.env.API_KEY,
-  defaultHeaders: {
-    "HTTP-Referer": "https://thereallo.dev",
-    "X-Title": "thereallo.dev",
-  },
+	baseURL: process.env.BASE_URL,
+	apiKey: process.env.API_KEY,
+	defaultHeaders: {
+		"HTTP-Referer": "https://thereallo.dev",
+		"X-Title": "thereallo.dev",
+	},
 });
 
 export async function generatePrompt(expression: string): Promise<string> {
-  try {
-    const response = await client.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt(expression),
-        },
-        {
-          role: "user",
-          content: `${expression}`,
-        },
-      ],
-      model: "google/gemini-2.0-flash-thinking-exp:free",
-      temperature: 0.5,
-      max_tokens: 300,
-    });
+	try {
+		const response = await client.chat.completions.create({
+			messages: [
+				{
+					role: "system",
+					content: systemPrompt(expression),
+				},
+				{
+					role: "user",
+					content: `${expression}`,
+				},
+			],
+			model: process.env.MODEL as string,
+			temperature: 0.5,
+			max_tokens: 300,
+		});
 
-    if (!response.choices || response.choices.length === 0) {
-      throw new Error("No response generated");
-    }
-    const generatedContent = response.choices[0].message?.content;
+		if (!response.choices || response.choices.length === 0) {
+			throw new Error("No response generated");
+		}
+		const generatedContent = response.choices[0].message?.content;
 
-    if (typeof generatedContent !== "string") {
-      throw new Error("Generated content is not a string");
-    }
+		if (typeof generatedContent !== "string") {
+			throw new Error("Generated content is not a string");
+		}
 
-    return generatedContent.trim();
-  } catch (error) {
-    console.error("Error calling API:", error);
-    throw new Error("Failed to generate explanation.");
-  }
+		return generatedContent.trim();
+	} catch (error) {
+		console.error("Error calling API:", error);
+		throw new Error("Failed to generate explanation.");
+	}
 }
 
 function systemPrompt(expression: string) {
-  const SYS_PROMPT = `You are a math tutor specializing in explaining LaTeX expressions using text only. Your sole purpose is to explain the provided LaTeX expression clearly and accurately.
+	const SYS_PROMPT = `You are a math tutor specializing in explaining LaTeX expressions using text only. Your sole purpose is to explain the provided LaTeX expression clearly and accurately.
 
 Your provided LaTeX expression is wrapped in a <expression> container.
 <expression>
@@ -77,5 +77,5 @@ Rules to follow strictly:
 - You will be fired if you break any of the rules.
 
 Remember, your goal is to make the LaTeX expression understandable to someone who may not be familiar with LaTeX notation.`;
-  return SYS_PROMPT;
+	return SYS_PROMPT;
 }
