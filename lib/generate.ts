@@ -38,7 +38,7 @@ export async function generatePrompt(expression: string): Promise<string> {
 
 		return generatedContent.trim();
 	} catch (error) {
-		console.error("Error calling API:", error);
+		// console.error("Error calling API:", error);
 		throw new Error("Failed to generate explanation.");
 	}
 }
