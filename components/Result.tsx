@@ -11,17 +11,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "./ui/button";
-
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Icon } from "@iconify/react/dist/iconify.js";
-
-// import { ConvertSVG } from "@/lib/LaTeX";
-// import { useState } from "react";
 
 import DownloadButton from "@/components/DownloadButton";
 import { RefObject, useEffect, useState } from "react";
 import { ConvertSVG } from "@/lib/LaTeX";
 import { TurnstileInstance } from "@marsidev/react-turnstile";
 import { useAi } from "@/hooks/use-ai";
+
+type Mode = "download" | "copy";
 
 export default function ResultPopup({
   open,
@@ -38,6 +37,14 @@ export default function ResultPopup({
 }) {
   const [renderedSVG, setRenderedSVG] = useState("");
   const [showAI, setShowAI] = useState(false);
+  const [mode, setMode] = useState<Mode>(() => {
+    if (typeof window !== "undefined") {
+      return (
+        (localStorage.getItem("latex-renderer-mode") as Mode) || "download"
+      );
+    }
+    return "download";
+  });
 
   const { explain, loading, error, data } = useAi(turnstileRef);
 
@@ -53,6 +60,11 @@ export default function ResultPopup({
       return;
     }
     explain(expression);
+  };
+
+  const handleModeChange = (newMode: Mode) => {
+    setMode(newMode);
+    localStorage.setItem("latex-renderer-mode", newMode);
   };
 
   useEffect(() => {
@@ -123,24 +135,49 @@ export default function ResultPopup({
           </div>
 
           <div className="flex items-center justify-between">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="bg-gradient-to-tr from-blue-600 to-purple-600 text-white hover:bg-opacity-70"
-                    onClick={handleExplainButton}
-                    disabled={showAI}
+            <div className="flex items-center space-x-4">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="bg-gradient-to-tr from-blue-600 to-purple-600 text-white hover:bg-opacity-70"
+                      onClick={handleExplainButton}
+                      disabled={showAI}
+                    >
+                      <Icon icon="ri:gemini-fill" className="text-lg" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Explain with AI</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Tabs
+                value={mode}
+                onValueChange={handleModeChange as (value: string) => void}
+                className="w-[100px]"
+              >
+                <TabsList className="grid grid-cols-2 w-full">
+                  <TabsTrigger
+                    value="download"
+                    className="flex items-center justify-center"
                   >
-                    <Icon icon="ri:gemini-fill" className="text-lg" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Explain with AI</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <div>
-              <DownloadButton svg={renderedSVG} />
+                    <Icon
+                      icon="material-symbols:download"
+                      className="text-lg"
+                    />
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="copy"
+                    className="flex items-center justify-center"
+                  >
+                    <Icon icon="mdi:content-copy" className="text-lg" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            <div className="flex items-center space-x-4">
+              <DownloadButton svg={renderedSVG} mode={mode} />
             </div>
           </div>
         </div>
