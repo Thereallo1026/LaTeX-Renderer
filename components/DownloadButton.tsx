@@ -7,8 +7,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { toast } from "sonner";
 
-export default function DownloadButton({ svg }: { svg: string }) {
+type Mode = "download" | "copy";
+
+export default function DownloadButton({
+  svg,
+  mode,
+}: {
+  svg: string;
+  mode: Mode;
+}) {
   const handleDownload = (type: "svg" | "png" | "transparent") => {
     const downloadFile = (blob: Blob, fileName: string) => {
       const url = URL.createObjectURL(blob);
@@ -21,8 +30,17 @@ export default function DownloadButton({ svg }: { svg: string }) {
 
     if (type === "svg") {
       // svg
-      const blob = new Blob([svg], { type: "image/svg+xml" });
-      downloadFile(blob, "latex-render.svg");
+      if (mode === "copy") {
+        navigator.clipboard.writeText(svg).then(() => {
+          toast.success("SVG copied to clipboard", {
+            description: "SVG code has been copied to your clipboard.",
+            duration: 2000,
+          });
+        });
+      } else {
+        const blob = new Blob([svg], { type: "image/svg+xml" });
+        downloadFile(blob, "latex-render.svg");
+      }
     } else if (type === "png" || type === "transparent") {
       // png
       const img = new Image();
@@ -43,16 +61,33 @@ export default function DownloadButton({ svg }: { svg: string }) {
             ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
           }
           ctx.drawImage(img, margin / scale, margin / scale); // Use margin when drawing image
-          canvas.toBlob((blob) => {
-            if (blob) {
-              downloadFile(
-                blob,
-                `latex-render${
-                  type === "transparent" ? "-transparent" : ""
-                }.png`
-              );
-            }
-          }, "image/png");
+
+          if (mode === "copy") {
+            canvas.toBlob((blob) => {
+              if (blob) {
+                navigator.clipboard
+                  .write([new ClipboardItem({ [blob.type]: blob })])
+                  .then(() => {
+                    toast.success("Image copied to clipboard", {
+                      description:
+                        "The image has been copied to your clipboard.",
+                      duration: 2000,
+                    });
+                  });
+              }
+            }, "image/png");
+          } else {
+            canvas.toBlob((blob) => {
+              if (blob) {
+                downloadFile(
+                  blob,
+                  `latex-render${
+                    type === "transparent" ? "-transparent" : ""
+                  }.png`
+                );
+              }
+            }, "image/png");
+          }
         }
       };
       img.src = "data:image/svg+xml;base64," + btoa(svg);
@@ -62,15 +97,15 @@ export default function DownloadButton({ svg }: { svg: string }) {
   return (
     <div className="flex">
       <Button
-        className="bg-white text-black rounded-r-none px-3 py-2 hover:bg-gray-200"
+        className="bg-white text-black rounded-r-none px-3 py-2 hover:bg-gray-200 transition-colors duration-150"
         onClick={() => handleDownload("png")}
       >
         <Icon icon="ic:baseline-image" className="mr-2 text-lg" />
-        Download PNG
+        {mode === "download" ? "Download PNG" : "Copy PNG"}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Button className="bg-white text-black rounded-l-none px-2 py-2 border-l hover:bg-gray-200">
+          <Button className="bg-white text-black rounded-l-none px-2 py-2 border-l hover:bg-gray-200 transition-colors duration-150">
             <Icon icon="mdi:chevron-down" className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -80,13 +115,14 @@ export default function DownloadButton({ svg }: { svg: string }) {
             onSelect={() => handleDownload("transparent")}
           >
             <Icon icon="ic:outline-image" className="mr-2 text-lg" />
-            Transparent PNG
+            {mode === "download" ? "Transparent PNG" : "Transparent PNG"}
           </DropdownMenuItem>
           <DropdownMenuItem
             className="focus:bg-[#1a1a1a] focus:text-white"
             onSelect={() => handleDownload("svg")}
           >
-            <Icon icon="mdi:shape" className="mr-2 text-lg" /> SVG Vector
+            <Icon icon="mdi:shape" className="mr-2 text-lg" />
+            {mode === "download" ? "SVG Vector" : "SVG"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
